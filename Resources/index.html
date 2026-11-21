@@ -1,0 +1,2629 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PocketPad">
+  <meta name="theme-color" id="themeColorMeta" content="#0B0D12">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <title>PocketPad</title>
+  <style>
+    /* ==================== Apple Vibrancy & Liquid Glass Tokens ==================== */
+    :root, [data-theme="dark"] {
+      --bg-base: #0B0D12;
+      --mesh-1: rgba(42, 82, 152, 0.36);
+      --mesh-2: rgba(74, 62, 138, 0.28);
+      --mesh-3: rgba(34, 110, 138, 0.22);
+
+      --glass-surface: rgba(255, 255, 255, 0.085);
+      --glass-surface-hi: rgba(255, 255, 255, 0.13);
+      --glass-surface-active: rgba(255, 255, 255, 0.20);
+      --glass-track: rgba(0, 0, 0, 0.28);
+      --glass-deck: linear-gradient(165deg, rgba(255, 255, 255, 0.115) 0%, rgba(255, 255, 255, 0.055) 100%);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --glass-border-strong: rgba(255, 255, 255, 0.22);
+      --glass-top-edge: rgba(255, 255, 255, 0.26);
+      --glass-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+
+      --label: rgba(255, 255, 255, 0.94);
+      --label-2: rgba(235, 235, 245, 0.60);
+      --accent: #0A84FF;
+      --accent-rgb: 10, 132, 255;
+      --green: #30D158;
+      --orange: #FF9F0A;
+      --orange-rgb: 255, 159, 10;
+      --red: #FF453A;
+      --sheet-bg: rgba(28, 28, 34, 0.78);
+      --overlay-bg: rgba(12, 14, 20, 0.72);
+    }
+
+    [data-theme="light"] {
+      --bg-base: #E7EDF6;
+      --mesh-1: rgba(125, 178, 245, 0.44);
+      --mesh-2: rgba(188, 176, 242, 0.38);
+      --mesh-3: rgba(145, 214, 235, 0.34);
+
+      --glass-surface: rgba(255, 255, 255, 0.56);
+      --glass-surface-hi: rgba(255, 255, 255, 0.74);
+      --glass-surface-active: rgba(255, 255, 255, 0.92);
+      --glass-track: rgba(60, 60, 67, 0.10);
+      --glass-deck: linear-gradient(165deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.48) 100%);
+      --glass-border: rgba(255, 255, 255, 0.72);
+      --glass-border-strong: rgba(255, 255, 255, 0.88);
+      --glass-top-edge: rgba(255, 255, 255, 0.96);
+      --glass-shadow: 0 8px 24px rgba(24, 38, 66, 0.08);
+
+      --label: rgba(0, 0, 0, 0.88);
+      --label-2: rgba(60, 60, 67, 0.62);
+      --accent: #007AFF;
+      --accent-rgb: 0, 122, 255;
+      --green: #34C759;
+      --orange: #FF9500;
+      --orange-rgb: 255, 149, 0;
+      --red: #FF3B30;
+      --sheet-bg: rgba(246, 248, 252, 0.82);
+      --overlay-bg: rgba(232, 238, 248, 0.76);
+    }
+
+    :root {
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-right: env(safe-area-inset-right, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left: env(safe-area-inset-left, 0px);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      overscroll-behavior: none;
+      background: var(--bg-base);
+      color: var(--label);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: manipulation;
+    }
+
+    /* Subtle Apple wallpaper-grade ambient blur field */
+    .ambient {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+      background: var(--bg-base);
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(76px);
+    }
+    .blob-1 { width: 72vmax; height: 72vmax; top: -24vmax; left: -18vmax; background: radial-gradient(circle, var(--mesh-1), transparent 70%); }
+    .blob-2 { width: 66vmax; height: 66vmax; bottom: -24vmax; right: -16vmax; background: radial-gradient(circle, var(--mesh-2), transparent 70%); }
+    .blob-3 { width: 52vmax; height: 52vmax; top: 36%; left: 32%; background: radial-gradient(circle, var(--mesh-3), transparent 72%); }
+
+    svg.ico {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.75;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+    svg.ico-sm { width: 16px; height: 16px; }
+    svg.ico-lg { width: 20px; height: 20px; }
+
+    /* ==================== Stage & Manual Landscape ==================== */
+    .stage {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      z-index: 1;
+      transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    body.manual-landscape .stage {
+      top: 50%;
+      left: 50%;
+      right: auto;
+      bottom: auto;
+      width: 100dvh;
+      height: 100dvw;
+      transform: translate(-50%, -50%) rotate(90deg);
+    }
+
+    .app {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: calc(var(--safe-top) + 10px) calc(var(--safe-right) + 14px) calc(var(--safe-bottom) + 14px) calc(var(--safe-left) + 14px);
+      gap: 12px;
+    }
+
+    /* ==================== Minimal Apple Top Bar ==================== */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      height: 38px;
+      flex-shrink: 0;
+    }
+
+    .status-dot-wrap {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--glass-surface);
+      border: 0.5px solid var(--glass-border);
+      box-shadow: inset 0 0.5px 0 var(--glass-top-edge);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .led {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--orange);
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .led.online { background: var(--green); box-shadow: 0 0 8px rgba(48, 209, 88, 0.65); }
+    .led.offline { background: var(--red); }
+
+    /* Apple iOS Segmented Control */
+    .segmented {
+      display: flex;
+      background: var(--glass-track);
+      border: 0.5px solid var(--glass-border);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border-radius: 999px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .seg-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--label-2);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+    }
+    .seg-btn.active {
+      background: var(--glass-surface-hi);
+      color: var(--label);
+      font-weight: 600;
+      box-shadow: inset 0 0.5px 0 var(--glass-top-edge), 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+    .seg-btn svg.ico { display: none; }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .circle-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 0.5px solid var(--glass-border);
+      background: var(--glass-surface);
+      box-shadow: inset 0 0.5px 0 var(--glass-top-edge);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      color: var(--label);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: background 0.12s, transform 0.08s, color 0.12s;
+    }
+    .circle-btn:active { background: var(--glass-surface-active); transform: scale(0.93); }
+    .circle-btn.active-lit {
+      background: rgba(var(--accent-rgb), 0.22);
+      border-color: rgba(var(--accent-rgb), 0.55);
+      color: var(--accent);
+    }
+
+    .ax-banner {
+      display: none;
+      padding: 9px 14px;
+      border-radius: 14px;
+      background: rgba(var(--orange-rgb), 0.16);
+      border: 0.5px solid rgba(var(--orange-rgb), 0.40);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      color: var(--orange);
+      font-size: 12.5px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .ax-banner.show { display: block; }
+
+    /* ==================== Views ==================== */
+    .views-host {
+      flex: 1;
+      min-height: 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .view {
+      display: none;
+      flex: 1;
+      min-height: 0;
+      min-width: 0;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .view.active { display: flex; }
+
+    /* ==================== Serene Apple Glass Trackpad ==================== */
+    .deck-wrap {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      min-width: 0;
+      border-radius: 28px;
+      background: var(--glass-deck);
+      backdrop-filter: blur(34px) saturate(185%);
+      -webkit-backdrop-filter: blur(34px) saturate(185%);
+      border: 0.5px solid var(--glass-border-strong);
+      box-shadow:
+        inset 0 1px 0 var(--glass-top-edge),
+        var(--glass-shadow);
+      overflow: hidden;
+      touch-action: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .deck-wrap.dragging {
+      border-color: rgba(var(--orange-rgb), 0.65);
+      box-shadow:
+        inset 0 0 0 1px rgba(var(--orange-rgb), 0.25),
+        var(--glass-shadow);
+    }
+
+    .deck-hud {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-4px);
+      padding: 5px 14px;
+      border-radius: 999px;
+      background: var(--sheet-bg);
+      border: 0.5px solid var(--glass-border);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--label);
+      opacity: 0;
+      transition: opacity 0.16s ease, transform 0.16s ease;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 5;
+    }
+    .deck-hud.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .deck-hud.amber { color: var(--orange); border-color: rgba(var(--orange-rgb), 0.45); }
+
+    /* Soft Optical Finger Glow (no neon ring clutter) */
+    .touch-dot {
+      position: absolute;
+      width: 64px;
+      height: 64px;
+      margin-left: -32px;
+      margin-top: -32px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(var(--accent-rgb), 0.34) 0%, rgba(var(--accent-rgb), 0.10) 45%, transparent 72%);
+      pointer-events: none;
+      transform: translate3d(-120px, -120px, 0) scale(0.8);
+      opacity: 0;
+      transition: opacity 0.14s ease-out;
+      z-index: 4;
+    }
+    .touch-dot.active { opacity: 1; }
+    .deck-wrap.dragging .touch-dot {
+      background: radial-gradient(circle, rgba(var(--orange-rgb), 0.38) 0%, rgba(var(--orange-rgb), 0.12) 45%, transparent 72%);
+    }
+
+    /* Apple Glass Buttons */
+    .mouse-buttons {
+      display: grid;
+      grid-template-columns: 1fr 72px 1fr;
+      gap: 10px;
+      height: 58px;
+      flex-shrink: 0;
+    }
+
+    .glass-btn {
+      border: 0.5px solid var(--glass-border);
+      background: var(--glass-surface);
+      backdrop-filter: blur(28px) saturate(185%);
+      -webkit-backdrop-filter: blur(28px) saturate(185%);
+      color: var(--label);
+      border-radius: 18px;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: inset 0 0.5px 0 var(--glass-top-edge), var(--glass-shadow);
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform 0.08s ease, background 0.1s, border-color 0.14s, color 0.14s;
+    }
+    .glass-btn:active, .glass-btn.pressed {
+      background: var(--glass-surface-active);
+      transform: scale(0.97);
+    }
+    .glass-btn.primary {
+      background: var(--accent);
+      border-color: rgba(255, 255, 255, 0.24);
+      color: #FFFFFF;
+      font-weight: 600;
+      box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.35), 0 6px 18px rgba(var(--accent-rgb), 0.30);
+    }
+    .glass-btn.primary:active { filter: brightness(1.08); }
+    .glass-btn.armed {
+      background: rgba(var(--orange-rgb), 0.22);
+      border-color: rgba(var(--orange-rgb), 0.58);
+      color: var(--orange);
+    }
+    .glass-btn.accent-armed {
+      background: rgba(var(--accent-rgb), 0.22);
+      border-color: rgba(var(--accent-rgb), 0.58);
+      color: var(--accent);
+    }
+
+    /* ==================== Apple TV Remote-Inspired View ==================== */
+    .remote-layout {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      gap: 14px;
+    }
+
+    .remote-primary {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex: 1;
+      min-height: 224px;
+    }
+
+    .dpad {
+      position: relative;
+      width: min(244px, 64vw);
+      height: min(244px, 64vw);
+      border-radius: 50%;
+      background: var(--glass-deck);
+      backdrop-filter: blur(34px) saturate(185%);
+      -webkit-backdrop-filter: blur(34px) saturate(185%);
+      border: 0.5px solid var(--glass-border-strong);
+      box-shadow: inset 0 1px 0 var(--glass-top-edge), var(--glass-shadow);
+      touch-action: none;
+      transition: border-color 0.16s, box-shadow 0.16s;
+    }
+
+    .dpad.spinning {
+      border-color: rgba(var(--accent-rgb), 0.58);
+      box-shadow:
+        inset 0 0 0 1px rgba(var(--accent-rgb), 0.22),
+        0 0 28px rgba(var(--accent-rgb), 0.16),
+        var(--glass-shadow);
+    }
+
+    /* Subtle frosted track groove inside the wheel */
+    .wheel-track {
+      position: absolute;
+      inset: 14px;
+      border-radius: 50%;
+      border: 0.5px solid var(--glass-border);
+      pointer-events: none;
+    }
+
+    /* Glowing orbital indicator following thumb angle on the rim */
+    .wheel-knob {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 14px;
+      height: 14px;
+      margin-left: -7px;
+      margin-top: -7px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.85), 0 0 4px #FFFFFF;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.14s ease-out;
+      z-index: 4;
+    }
+    .dpad.spinning .wheel-knob { opacity: 1; }
+
+    .dpad-btn {
+      position: absolute;
+      color: var(--label-2);
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      transition: color 0.1s, transform 0.08s;
+    }
+    .dpad-btn.lit { color: var(--label); }
+    .dpad-up { top: 8px; left: 50%; transform: translateX(-50%); width: 72px; height: 58px; }
+    .dpad-up.lit { transform: translateX(-50%) scale(1.12); }
+    .dpad-down { bottom: 8px; left: 50%; transform: translateX(-50%); width: 72px; height: 58px; }
+    .dpad-down.lit { transform: translateX(-50%) scale(1.12); }
+    .dpad-left { left: 8px; top: 50%; transform: translateY(-50%); width: 58px; height: 72px; }
+    .dpad-left.lit { transform: translateY(-50%) scale(1.12); }
+    .dpad-right { right: 8px; top: 50%; transform: translateY(-50%); width: 58px; height: 72px; }
+    .dpad-right.lit { transform: translateY(-50%) scale(1.12); }
+
+    .dpad.joystick-mode .dpad-btn {
+      opacity: 0.14;
+      transform-origin: center;
+    }
+    .dpad.joystick-mode .wheel-track {
+      inset: 12px;
+      border-color: var(--glass-border-strong);
+      background: radial-gradient(circle, rgba(var(--accent-rgb), 0.06) 0%, transparent 72%);
+    }
+
+    /* Dynamic visual tension tether from origin to joystick cap */
+    .joy-ring-glow {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.14s ease-out;
+      z-index: 1;
+    }
+    .dpad.joystick-mode.spinning .joy-ring-glow { opacity: 1; }
+
+    /* Subtle Xbox-style concave thumbstick cap */
+    .dpad.joystick-mode .dpad-center {
+      width: 76px;
+      height: 76px;
+      background: radial-gradient(circle at 38% 32%, var(--glass-surface-active), var(--glass-surface));
+      box-shadow:
+        inset 0 2px 6px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 var(--glass-top-edge),
+        0 8px 22px rgba(0, 0, 0, 0.24);
+    }
+
+    .dpad-center {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: 0.5px solid var(--glass-border-strong);
+      background: var(--glass-surface-hi);
+      box-shadow: inset 0 1px 0 var(--glass-top-edge), 0 6px 20px rgba(0, 0, 0, 0.16);
+      color: var(--label);
+      font-size: 13.5px;
+      font-weight: 500;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      transition: transform 0.28s cubic-bezier(0.22, 1.35, 0.36, 1), background 0.1s, color 0.12s, box-shadow 0.14s;
+      z-index: 3;
+      will-change: transform;
+    }
+    .dpad-center.pressed {
+      background: var(--glass-surface-active);
+      transform: translate(-50%, -50%) scale(0.93);
+      transition: transform 0.08s ease, background 0.1s;
+    }
+    .dpad-center.joy-dragging {
+      transition: background 0.1s, box-shadow 0.14s;
+      background: var(--glass-surface-active);
+      box-shadow: inset 0 1px 0 var(--glass-top-edge), 0 10px 26px rgba(var(--accent-rgb), 0.28);
+      border-color: rgba(var(--accent-rgb), 0.55);
+    }
+    .dpad-center.active-readout {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .pill-row.joy-actions {
+      display: none;
+      grid-template-columns: 1fr 64px 1fr;
+    }
+    #view-remote.joy-active .pill-row.media { display: none; }
+    #view-remote.joy-active .pill-row.joy-actions { display: grid; }
+
+    .wheel-modes {
+      display: inline-flex;
+      background: var(--glass-track);
+      border: 0.5px solid var(--glass-border);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-radius: 999px;
+      padding: 2.5px;
+      gap: 2px;
+    }
+    .wheel-mode-btn {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--label-2);
+      padding: 4px 11px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .wheel-mode-btn.active {
+      background: var(--glass-surface-hi);
+      color: var(--label);
+      font-weight: 600;
+    }
+
+    .remote-secondary {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .pill-row {
+      display: grid;
+      gap: 10px;
+      height: 54px;
+    }
+    .pill-row.media { grid-template-columns: 1fr 1.25fr 1fr; }
+    .pill-row.vol-bright { grid-template-columns: 1.35fr 1fr; }
+
+    .capsule-group {
+      display: grid;
+      background: var(--glass-surface);
+      backdrop-filter: blur(28px) saturate(185%);
+      -webkit-backdrop-filter: blur(28px) saturate(185%);
+      border: 0.5px solid var(--glass-border);
+      box-shadow: inset 0 0.5px 0 var(--glass-top-edge), var(--glass-shadow);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .capsule-group.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .capsule-group.cols-2 { grid-template-columns: repeat(2, 1fr); }
+
+    .cap-btn {
+      display: grid;
+      place-items: center;
+      color: var(--label);
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .cap-btn:active { background: var(--glass-surface-active); }
+
+    .quick-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .quick-row .glass-btn {
+      height: 60px;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 11.5px;
+      border-radius: 18px;
+    }
+
+    /* ==================== Clean Keyboard View ==================== */
+    .kb-layout {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .kb-compose {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: var(--glass-surface);
+      backdrop-filter: blur(30px) saturate(185%);
+      -webkit-backdrop-filter: blur(30px) saturate(185%);
+      border: 0.5px solid var(--glass-border);
+      box-shadow: inset 0 0.5px 0 var(--glass-top-edge), var(--glass-shadow);
+      border-radius: 22px;
+      padding: 12px;
+    }
+
+    .kb-textarea {
+      width: 100%;
+      min-height: 90px;
+      flex: 1;
+      resize: none;
+      border: none;
+      border-radius: 14px;
+      background: var(--glass-track);
+      color: var(--label);
+      font-size: 16px;
+      line-height: 1.5;
+      padding: 11px 13px;
+      font-family: inherit;
+      outline: none;
+      -webkit-user-select: text;
+      user-select: text;
+    }
+    .kb-textarea::placeholder { color: var(--label-2); }
+
+    .kb-send-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      height: 46px;
+    }
+    .kb-send-row .glass-btn { border-radius: 14px; font-size: 14px; }
+
+    .kb-keys-col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .kb-row {
+      display: grid;
+      gap: 8px;
+      height: 46px;
+    }
+    .kb-row.cols-4 { grid-template-columns: repeat(4, 1fr); }
+    .kb-row.cols-5 { grid-template-columns: repeat(5, 1fr); }
+    .kb-row .glass-btn { border-radius: 14px; font-size: 13.5px; }
+
+    .kb-arrows {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      height: 48px;
+      margin-top: auto;
+    }
+    .kb-arrows .glass-btn { border-radius: 14px; }
+
+    /* ==================== LANDSCAPE ARCHITECTURE ==================== */
+    @media (orientation: landscape) and (max-height: 540px) {
+      .app {
+        flex-direction: row-reverse;
+        padding: calc(var(--safe-top) + 10px) calc(var(--safe-right) + 12px) calc(var(--safe-bottom) + 10px) calc(var(--safe-left) + 12px);
+        gap: 10px;
+      }
+      .topbar { flex-direction: column; width: 48px; height: 100%; padding: 2px 0; }
+      .segmented { flex-direction: column; padding: 4px; gap: 4px; }
+      .seg-btn { width: 38px; height: 38px; padding: 0; }
+      .seg-btn span { display: none; }
+      .seg-btn svg.ico { display: block; }
+      .top-actions { flex-direction: column; }
+      #rotateBtn { display: none; }
+
+      #view-trackpad { flex-direction: row; gap: 10px; }
+      #view-trackpad .mouse-buttons {
+        display: flex;
+        flex-direction: column-reverse;
+        width: 68px;
+        height: 100%;
+        gap: 8px;
+      }
+      #view-trackpad #btnLeft { flex: 1.45; }
+      #view-trackpad #btnRight { flex: 1.15; }
+      #view-trackpad #btnDrag { flex: 0.8; }
+
+      .remote-layout { flex-direction: row; align-items: center; gap: 16px; }
+      .remote-primary { flex: 0 0 236px; min-height: 0; gap: 8px; }
+      .dpad { width: 218px; height: 218px; }
+      .dpad-center { width: 78px; height: 78px; }
+      .remote-secondary { flex: 1; gap: 10px; }
+      .pill-row { height: 46px; }
+      .quick-row .glass-btn { height: 52px; }
+
+      .kb-layout { flex-direction: row; gap: 10px; }
+      .kb-compose { flex: 0.95; min-height: 0; }
+      .kb-textarea { min-height: 0; }
+      .kb-keys-col { flex: 1.1; justify-content: space-between; gap: 8px; }
+      .kb-row { height: 42px; }
+      .kb-arrows { height: 42px; margin-top: 0; }
+    }
+
+    body.manual-landscape .app {
+      flex-direction: row-reverse;
+      padding: 10px calc(var(--safe-bottom) + 12px) 10px calc(var(--safe-top) + 12px);
+      gap: 10px;
+    }
+    body.manual-landscape .topbar { flex-direction: column; width: 48px; height: 100%; padding: 2px 0; }
+    body.manual-landscape .segmented { flex-direction: column; padding: 4px; gap: 4px; }
+    body.manual-landscape .seg-btn { width: 38px; height: 38px; padding: 0; }
+    body.manual-landscape .seg-btn span { display: none; }
+    body.manual-landscape .seg-btn svg.ico { display: block; }
+    body.manual-landscape .top-actions { flex-direction: column; }
+    body.manual-landscape #view-trackpad { flex-direction: row; gap: 10px; }
+    body.manual-landscape #view-trackpad .mouse-buttons {
+      display: flex;
+      flex-direction: column-reverse;
+      width: 68px;
+      height: 100%;
+      gap: 8px;
+    }
+    body.manual-landscape #view-trackpad #btnLeft { flex: 1.45; }
+    body.manual-landscape #view-trackpad #btnRight { flex: 1.15; }
+    body.manual-landscape #view-trackpad #btnDrag { flex: 0.8; }
+    body.manual-landscape .remote-layout { flex-direction: row; align-items: center; gap: 16px; }
+    body.manual-landscape .remote-primary { flex: 0 0 236px; min-height: 0; gap: 8px; }
+    body.manual-landscape .dpad { width: 218px; height: 218px; }
+    body.manual-landscape .dpad-center { width: 78px; height: 78px; }
+    body.manual-landscape .remote-secondary { flex: 1; gap: 10px; }
+    body.manual-landscape .pill-row { height: 46px; }
+    body.manual-landscape .quick-row .glass-btn { height: 52px; }
+    body.manual-landscape .kb-layout { flex-direction: row; gap: 10px; }
+    body.manual-landscape .kb-compose { flex: 0.95; min-height: 0; }
+    body.manual-landscape .kb-textarea { min-height: 0; }
+    body.manual-landscape .kb-keys-col { flex: 1.1; justify-content: space-between; gap: 8px; }
+    body.manual-landscape .kb-row { height: 42px; }
+    body.manual-landscape .kb-arrows { height: 42px; margin-top: 0; }
+
+    /* ==================== Apple Settings Sheet & PIN ==================== */
+    .sheet-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.32);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 16px;
+    }
+    .sheet-backdrop.open { display: flex; }
+
+    .sheet {
+      width: 100%;
+      max-width: 372px;
+      max-height: 90%;
+      overflow-y: auto;
+      background: var(--sheet-bg);
+      backdrop-filter: blur(36px) saturate(190%);
+      -webkit-backdrop-filter: blur(36px) saturate(190%);
+      border: 0.5px solid var(--glass-border-strong);
+      box-shadow: inset 0 0.5px 0 var(--glass-top-edge), 0 24px 60px rgba(0, 0, 0, 0.36);
+      border-radius: 28px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sheet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sheet-title { font-size: 16px; font-weight: 600; }
+
+    .appearance-seg {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--glass-track);
+      border-radius: 12px;
+      padding: 3px;
+      gap: 3px;
+    }
+    .appearance-opt {
+      text-align: center;
+      padding: 8px 0;
+      border-radius: 9px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--label-2);
+      cursor: pointer;
+    }
+    .appearance-opt.selected {
+      background: var(--glass-surface-hi);
+      color: var(--label);
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    }
+
+    .setting-row { display: flex; flex-direction: column; gap: 6px; }
+    .setting-label { display: flex; justify-content: space-between; font-size: 13.5px; }
+    .setting-val { color: var(--label-2); font-variant-numeric: tabular-nums; }
+    input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+      gap: 12px;
+    }
+
+    .switch {
+      position: relative;
+      width: 48px;
+      height: 29px;
+      appearance: none;
+      background: var(--glass-track);
+      border-radius: 999px;
+      outline: none;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .switch::after {
+      content: "";
+      position: absolute;
+      top: 2.5px;
+      left: 2.5px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.22);
+      transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .switch:checked { background: var(--green); }
+    .switch:checked::after { transform: translateX(19px); }
+
+    .sheet-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12.5px;
+      color: var(--label-2);
+      padding-top: 4px;
+    }
+    .text-action {
+      color: var(--accent);
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    /* PIN Overlay */
+    .pin-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-bg);
+      backdrop-filter: blur(32px) saturate(185%);
+      -webkit-backdrop-filter: blur(32px) saturate(185%);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      z-index: 80;
+      padding: 20px;
+    }
+    .pin-overlay.open { display: flex; }
+    .pin-title { font-size: 19px; font-weight: 600; }
+    .pin-error { font-size: 13px; color: var(--red); min-height: 18px; }
+    .pin-dots { display: flex; gap: 16px; }
+    .pin-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1.5px solid var(--label-2);
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .pin-dot.filled { background: var(--label); border-color: var(--label); }
+
+    .pin-pad { display: grid; grid-template-columns: repeat(3, 72px); gap: 14px; }
+    .pin-key {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 0.5px solid var(--glass-border);
+      background: var(--glass-surface);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      color: var(--label);
+      font-size: 25px;
+      font-weight: 400;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+    .pin-key:active { background: var(--glass-surface-active); transform: scale(0.95); }
+    .pin-key.ghost { background: transparent; border-color: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; font-size: 15px; color: var(--label-2); }
+
+    #hapticSwitch, #hapticLabel {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <input type="checkbox" switch id="hapticSwitch" aria-hidden="true" tabindex="-1">
+  <label id="hapticLabel" for="hapticSwitch" aria-hidden="true"></label>
+
+  <div class="ambient" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="app">
+      <!-- Minimal Top Bar -->
+      <div class="topbar">
+        <div class="status-dot-wrap" id="statusPill" title="连接状态">
+          <span class="led" id="led"></span>
+        </div>
+
+        <div class="segmented" role="tablist">
+          <label for="hapticSwitch" role="tab" class="seg-btn active" data-view="trackpad" aria-label="触控板">
+            <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+            <span>触控板</span>
+          </label>
+          <label for="hapticSwitch" role="tab" class="seg-btn" data-view="remote" aria-label="遥控">
+            <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>遥控</span>
+          </label>
+          <label for="hapticSwitch" role="tab" class="seg-btn" data-view="keyboard" aria-label="键盘">
+            <svg class="ico" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 15h8"/></svg>
+            <span>键盘</span>
+          </label>
+        </div>
+
+        <div class="top-actions">
+          <label for="hapticSwitch" role="button" class="circle-btn" id="rotateBtn" aria-label="横屏">
+            <svg class="ico ico-sm" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.5"/></svg>
+          </label>
+          <label for="hapticSwitch" role="button" class="circle-btn" id="settingsBtn" aria-label="设置">
+            <svg class="ico ico-sm" viewBox="0 0 24 24"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="9" cy="8" r="2"/><circle cx="15" cy="16" r="2"/></svg>
+          </label>
+        </div>
+      </div>
+
+      <div class="views-host">
+        <div class="ax-banner" id="axBanner">
+          请在 Mac 系统设置的「辅助功能」中开启 PocketPad 开关（点此刷新状态）
+        </div>
+
+        <!-- Trackpad -->
+        <section class="view active" id="view-trackpad">
+          <div class="deck-wrap" id="trackpad">
+            <div class="deck-hud" id="deckHud">触控板</div>
+            <div class="touch-dot" id="dot0"></div>
+            <div class="touch-dot" id="dot1"></div>
+            <div class="touch-dot" id="dot2"></div>
+          </div>
+
+          <div class="mouse-buttons">
+            <label for="hapticSwitch" role="button" class="glass-btn" id="btnLeft">左键</label>
+            <label for="hapticSwitch" role="button" class="glass-btn" id="btnDrag" aria-label="拖拽锁定">
+              <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-4 0v4M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8l-1.5-1.5a2 2 0 0 0-2.8 2.8l4.8 4.8A6 6 0 0 0 10.7 22H14a6 6 0 0 0 6-6v-5a2 2 0 0 0-2-2z"/></svg>
+            </label>
+            <label for="hapticSwitch" role="button" class="glass-btn" id="btnRight">右键</label>
+          </div>
+        </section>
+
+        <!-- Remote (Apple Click-Wheel + Control Center Inspired) -->
+        <section class="view" id="view-remote">
+          <div class="remote-layout">
+            <div class="remote-primary">
+              <div class="dpad" id="clickWheel" aria-label="触控轮盘">
+                <div class="joy-ring-glow" id="joyRingGlow"></div>
+                <div class="wheel-track"></div>
+                <div class="wheel-knob" id="wheelKnob"></div>
+                <div class="dpad-btn dpad-up" id="wUp" aria-hidden="true">
+                  <svg class="ico ico-lg" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></svg>
+                </div>
+                <div class="dpad-btn dpad-down" id="wDown" aria-hidden="true">
+                  <svg class="ico ico-lg" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+                <div class="dpad-btn dpad-left" id="wLeft" aria-hidden="true">
+                  <svg class="ico ico-lg" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg>
+                </div>
+                <div class="dpad-btn dpad-right" id="wRight" aria-hidden="true">
+                  <svg class="ico ico-lg" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+                </div>
+                <div class="dpad-center" id="wCenter">确认</div>
+              </div>
+
+              <div class="wheel-modes" role="radiogroup" aria-label="轮盘模式">
+                <label for="hapticSwitch" role="radio" class="wheel-mode-btn active" data-wheel-mode="step">快进</label>
+                <label for="hapticSwitch" role="radio" class="wheel-mode-btn" data-wheel-mode="scroll">滚动</label>
+                <label for="hapticSwitch" role="radio" class="wheel-mode-btn" data-wheel-mode="volume">音量</label>
+                <label for="hapticSwitch" role="radio" class="wheel-mode-btn" data-wheel-mode="joystick">摇杆</label>
+              </div>
+            </div>
+
+            <div class="remote-secondary">
+              <div class="pill-row media">
+                <label for="hapticSwitch" role="button" class="glass-btn" data-media="prev" aria-label="上一曲" style="border-radius:999px">
+                  <svg class="ico" viewBox="0 0 24 24"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+                </label>
+                <label for="hapticSwitch" role="button" class="glass-btn primary" data-media="play_pause" aria-label="播放暂停" style="border-radius:999px">
+                  <svg class="ico" viewBox="0 0 24 24"><polygon points="5 4 14 12 5 20 5 4"/><line x1="17" y1="5" x2="17" y2="19"/><line x1="21" y1="5" x2="21" y2="19"/></svg>
+                </label>
+                <label for="hapticSwitch" role="button" class="glass-btn" data-media="next" aria-label="下一曲" style="border-radius:999px">
+                  <svg class="ico" viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+                </label>
+              </div>
+
+              <div class="pill-row joy-actions">
+                <label for="hapticSwitch" role="button" class="glass-btn primary" id="joyLeftBtn" style="border-radius:999px">左键</label>
+                <label for="hapticSwitch" role="button" class="glass-btn" id="joyDragBtn" aria-label="拖拽锁定" style="border-radius:999px">
+                  <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-4 0v4M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8l-1.5-1.5a2 2 0 0 0-2.8 2.8l4.8 4.8A6 6 0 0 0 10.7 22H14a6 6 0 0 0 6-6v-5a2 2 0 0 0-2-2z"/></svg>
+                </label>
+                <label for="hapticSwitch" role="button" class="glass-btn" id="joyRightBtn" style="border-radius:999px">右键</label>
+              </div>
+
+              <div class="pill-row vol-bright">
+                <div class="capsule-group cols-3">
+                  <label for="hapticSwitch" role="button" class="cap-btn" data-media="vol_down" aria-label="减小音量">
+                    <svg class="ico ico-sm" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </label>
+                  <label for="hapticSwitch" role="button" class="cap-btn" data-media="mute" aria-label="静音">
+                    <svg class="ico ico-sm" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>
+                  </label>
+                  <label for="hapticSwitch" role="button" class="cap-btn" data-media="vol_up" aria-label="增大音量">
+                    <svg class="ico ico-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </label>
+                </div>
+
+                <div class="capsule-group cols-2">
+                  <label for="hapticSwitch" role="button" class="cap-btn" data-media="brightness_down" aria-label="降低亮度">
+                    <svg class="ico ico-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M12 4v1.5M12 18.5V20M4 12h1.5M18.5 12H20"/></svg>
+                  </label>
+                  <label for="hapticSwitch" role="button" class="cap-btn" data-media="brightness_up" aria-label="提高亮度">
+                    <svg class="ico ico-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/></svg>
+                  </label>
+                </div>
+              </div>
+
+              <div class="quick-row">
+                <label for="hapticSwitch" role="button" class="glass-btn" data-action="mission_control">
+                  <svg class="ico ico-sm" viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/></svg>
+                  <span>调度中心</span>
+                </label>
+                <label for="hapticSwitch" role="button" class="glass-btn" data-action="spotlight">
+                  <svg class="ico ico-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <span>搜索</span>
+                </label>
+                <label for="hapticSwitch" role="button" class="glass-btn" data-action="ppt_start">
+                  <svg class="ico ico-sm" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="14" rx="2"/><polygon points="10 8 15 11 10 14 10 8"/></svg>
+                  <span>放映</span>
+                </label>
+                <label for="hapticSwitch" role="button" class="glass-btn" data-action="lock_screen">
+                  <svg class="ico ico-sm" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                  <span>锁屏</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Clean Keyboard -->
+        <section class="view" id="view-keyboard">
+          <div class="kb-layout">
+            <div class="kb-compose">
+              <textarea class="kb-textarea" id="textInput" placeholder="输入文字发送到 Mac…"></textarea>
+              <div class="kb-send-row">
+                <div role="button" class="glass-btn" id="sendTextBtn">发送</div>
+                <div role="button" class="glass-btn primary" id="sendEnterBtn">发送并回车</div>
+              </div>
+            </div>
+
+            <div class="kb-keys-col">
+              <div class="kb-row cols-4">
+                <label for="hapticSwitch" role="button" class="glass-btn mod-btn" data-mod="cmd">⌘</label>
+                <label for="hapticSwitch" role="button" class="glass-btn mod-btn" data-mod="opt">⌥</label>
+                <label for="hapticSwitch" role="button" class="glass-btn mod-btn" data-mod="ctrl">⌃</label>
+                <label for="hapticSwitch" role="button" class="glass-btn mod-btn" data-mod="shift">⇧</label>
+              </div>
+
+              <div class="kb-row cols-5">
+                <label for="hapticSwitch" role="button" class="glass-btn" data-key="esc">Esc</label>
+                <label for="hapticSwitch" role="button" class="glass-btn" data-key="tab">Tab</label>
+                <label for="hapticSwitch" role="button" class="glass-btn" data-key="space">空格</label>
+                <label for="hapticSwitch" role="button" class="glass-btn" data-key="backspace" aria-label="退格">
+                  <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>
+                </label>
+                <label for="hapticSwitch" role="button" class="glass-btn" data-key="enter" aria-label="回车">
+                  <svg class="ico ico-sm" viewBox="0 0 24 24"><polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/></svg>
+                </label>
+              </div>
+
+              <div class="kb-row cols-4">
+                <label for="hapticSwitch" role="button" class="glass-btn" data-shortcut="c" data-mods="cmd">复制</label>
+                <label for="hapticSwitch" role="button" class="glass-btn" data-shortcut="v" data-mods="cmd">粘贴</label>
+                <label for="hapticSwitch" role="button" class="glass-btn" data-shortcut="z" data-mods="cmd">撤销</label>
+                <label for="hapticSwitch" role="button" class="glass-btn" data-shortcut="tab" data-mods="cmd">切应用</label>
+              </div>
+
+              <div class="kb-arrows">
+                <label for="hapticSwitch" role="button" class="glass-btn" data-key="left" aria-label="左">
+                  <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+                </label>
+                <label for="hapticSwitch" role="button" class="glass-btn" data-key="up" aria-label="上">
+                  <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></svg>
+                </label>
+                <label for="hapticSwitch" role="button" class="glass-btn" data-key="down" aria-label="下">
+                  <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+                </label>
+                <label for="hapticSwitch" role="button" class="glass-btn" data-key="right" aria-label="右">
+                  <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Settings Sheet -->
+    <div class="sheet-backdrop" id="settingsSheet">
+      <div class="sheet">
+        <div class="sheet-header">
+          <div class="sheet-title">设置</div>
+          <label for="hapticSwitch" role="button" class="circle-btn" id="closeSettingsBtn" aria-label="关闭" style="width:30px;height:30px">
+            <svg class="ico ico-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </label>
+        </div>
+
+        <div class="appearance-seg">
+          <label for="hapticSwitch" role="button" class="appearance-opt" data-theme-pick="dark">深色玻璃</label>
+          <label for="hapticSwitch" role="button" class="appearance-opt" data-theme-pick="light">浅色玻璃</label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-label">
+            <span>指针速度</span>
+            <span class="setting-val" id="pointerVal">1.5×</span>
+          </div>
+          <input type="range" id="pointerRange" min="0.6" max="3.0" step="0.1">
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-label">
+            <span>滚动速度</span>
+            <span class="setting-val" id="scrollVal">1.4×</span>
+          </div>
+          <input type="range" id="scrollRange" min="0.5" max="3.0" step="0.1">
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-label">
+            <span>摇杆响应曲线（Xbox 风格）</span>
+          </div>
+          <div class="appearance-seg" style="grid-template-columns: repeat(3, 1fr);">
+            <label for="hapticSwitch" role="button" class="appearance-opt" data-joy-curve="precise">精准</label>
+            <label for="hapticSwitch" role="button" class="appearance-opt" data-joy-curve="smooth">平衡</label>
+            <label for="hapticSwitch" role="button" class="appearance-opt" data-joy-curve="instant">敏捷</label>
+          </div>
+        </div>
+
+        <div class="toggle-row">
+          <span>横屏模式</span>
+          <input type="checkbox" switch class="switch" id="landscapeToggle">
+        </div>
+
+        <div class="toggle-row">
+          <span>自然滚动</span>
+          <input type="checkbox" switch class="switch" id="naturalScrollToggle">
+        </div>
+
+        <div class="toggle-row">
+          <span>轻点点按</span>
+          <input type="checkbox" switch class="switch" id="tapClickToggle">
+        </div>
+
+        <div class="toggle-row">
+          <span>触感反馈</span>
+          <input type="checkbox" switch class="switch" id="hapticToggle">
+        </div>
+
+        <div class="sheet-footer">
+          <span id="hostFooter">未连接</span>
+          <label for="hapticSwitch" role="button" class="text-action" id="reenterPinBtn">重新配对</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- PIN Overlay -->
+    <div class="pin-overlay" id="pinOverlay">
+      <div class="pin-title">输入配对码</div>
+      <div class="pin-dots" id="pinDots">
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+      </div>
+      <div class="pin-error" id="pinError"></div>
+      <div class="pin-pad" id="pinPad">
+        <label for="hapticSwitch" role="button" class="pin-key" data-n="1">1</label>
+        <label for="hapticSwitch" role="button" class="pin-key" data-n="2">2</label>
+        <label for="hapticSwitch" role="button" class="pin-key" data-n="3">3</label>
+        <label for="hapticSwitch" role="button" class="pin-key" data-n="4">4</label>
+        <label for="hapticSwitch" role="button" class="pin-key" data-n="5">5</label>
+        <label for="hapticSwitch" role="button" class="pin-key" data-n="6">6</label>
+        <label for="hapticSwitch" role="button" class="pin-key" data-n="7">7</label>
+        <label for="hapticSwitch" role="button" class="pin-key" data-n="8">8</label>
+        <label for="hapticSwitch" role="button" class="pin-key" data-n="9">9</label>
+        <label for="hapticSwitch" role="button" class="pin-key ghost" data-n="clear">清空</label>
+        <label for="hapticSwitch" role="button" class="pin-key" data-n="0">0</label>
+        <label for="hapticSwitch" role="button" class="pin-key ghost" data-n="del">删除</label>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      // ================== Persistent Preferences ==================
+      const savedTheme = localStorage.getItem('pp_theme');
+      const normalizedTheme = savedTheme === 'light' || savedTheme === 'titanium' ? 'light' : 'dark';
+      const prefs = {
+        theme: normalizedTheme,
+        pointerSpeed: parseFloat(localStorage.getItem('pp_pointer') || '1.5'),
+        scrollSpeed: parseFloat(localStorage.getItem('pp_scroll') || '1.4'),
+        naturalScroll: (localStorage.getItem('pp_natural') ?? '1') === '1',
+        tapToClick: (localStorage.getItem('pp_tap') ?? '1') === '1',
+        haptics: (localStorage.getItem('pp_haptics') ?? '1') === '1',
+        manualLandscape: (localStorage.getItem('pp_landscape') ?? '0') === '1',
+        joyCurve: localStorage.getItem('pp_joy_curve') || 'smooth',
+        pin: new URLSearchParams(location.search).get('pin') || localStorage.getItem('pp_pin') || ''
+      };
+      if (prefs.pin) localStorage.setItem('pp_pin', prefs.pin);
+
+      // ================== Theme & Orientation ==================
+      const themeColorMeta = document.getElementById('themeColorMeta');
+      const themeOpts = [...document.querySelectorAll('[data-theme-pick]')];
+      const rotateBtn = document.getElementById('rotateBtn');
+      const landscapeToggle = document.getElementById('landscapeToggle');
+
+      function applyTheme(theme) {
+        prefs.theme = theme === 'light' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', prefs.theme);
+        themeColorMeta.setAttribute('content', prefs.theme === 'light' ? '#E7EDF6' : '#0B0D12');
+        localStorage.setItem('pp_theme', prefs.theme);
+        themeOpts.forEach(o => o.classList.toggle('selected', o.dataset.themePick === prefs.theme));
+      }
+      applyTheme(prefs.theme);
+
+      function isNativeLandscape() {
+        return window.innerWidth > window.innerHeight;
+      }
+
+      function isManualRotated() {
+        return prefs.manualLandscape && !isNativeLandscape();
+      }
+
+      function applyOrientation() {
+        const rotated = isManualRotated();
+        document.body.classList.toggle('manual-landscape', rotated);
+        rotateBtn.classList.toggle('active-lit', rotated);
+        landscapeToggle.checked = prefs.manualLandscape;
+      }
+      applyOrientation();
+      window.addEventListener('resize', applyOrientation);
+      window.addEventListener('orientationchange', () => setTimeout(applyOrientation, 60));
+
+      rotateBtn.addEventListener('click', () => {
+        prefs.manualLandscape = !prefs.manualLandscape;
+        localStorage.setItem('pp_landscape', prefs.manualLandscape ? '1' : '0');
+        applyOrientation();
+      });
+
+      landscapeToggle.addEventListener('change', () => {
+        prefs.manualLandscape = landscapeToggle.checked;
+        localStorage.setItem('pp_landscape', prefs.manualLandscape ? '1' : '0');
+        applyOrientation();
+      });
+
+      themeOpts.forEach(opt => {
+        opt.addEventListener('click', () => applyTheme(opt.dataset.themePick));
+      });
+
+      // ================== iOS Taptic Engine Haptics ==================
+      const hapticSwitch = document.getElementById('hapticSwitch');
+      const hapticLabel = document.getElementById('hapticLabel');
+
+      function syncHapticState() {
+        hapticSwitch.disabled = !prefs.haptics;
+      }
+      syncHapticState();
+
+      function triggerHaptic() {
+        if (!prefs.haptics) return;
+        try {
+          if (typeof navigator.vibrate === 'function') navigator.vibrate(10);
+          hapticLabel.click();
+        } catch (_) {}
+      }
+
+      // ================== WebSocket Connection ==================
+      let ws = null;
+      let isAuthed = false;
+      let reconnectTimer = null;
+      let pingTimer = null;
+
+      const led = document.getElementById('led');
+      const hostFooter = document.getElementById('hostFooter');
+      const axBanner = document.getElementById('axBanner');
+      const pinOverlay = document.getElementById('pinOverlay');
+      const pinError = document.getElementById('pinError');
+      const pinDots = [...document.querySelectorAll('.pin-dot')];
+
+      function setStatus(state, label) {
+        led.className = 'led ' + (state === 'online' ? 'online' : state === 'offline' ? 'offline' : '');
+        if (label) hostFooter.textContent = label;
+      }
+
+      function send(obj) {
+        if (ws && ws.readyState === WebSocket.OPEN && (isAuthed || obj.type === 'auth' || obj.type === 'ping')) {
+          ws.send(JSON.stringify(obj));
+          return true;
+        }
+        return false;
+      }
+
+      function connect() {
+        clearTimeout(reconnectTimer);
+        clearInterval(pingTimer);
+        if (ws) { try { ws.close(); } catch (_) {} }
+        isAuthed = false;
+        setStatus('connecting', '连接中…');
+
+        const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const q = prefs.pin ? ('?pin=' + encodeURIComponent(prefs.pin)) : '';
+        ws = new WebSocket(`${proto}//${location.host}/ws${q}`);
+
+        ws.onopen = () => {
+          pingTimer = setInterval(() => send({ type: 'ping' }), 15000);
+        };
+
+        ws.onmessage = (evt) => {
+          let msg;
+          try { msg = JSON.parse(evt.data); } catch (_) { return; }
+
+          if (msg.type === 'auth_ok') {
+            isAuthed = true;
+            pinOverlay.classList.remove('open');
+            pinError.textContent = '';
+            setStatus('online', '已连接 · ' + (msg.host || 'Mac'));
+            axBanner.classList.toggle('show', msg.accessibility === false);
+          } else if (msg.type === 'auth_required') {
+            isAuthed = false;
+            setStatus('connecting', '等待配对');
+            openPinPad();
+          } else if (msg.type === 'auth_error') {
+            isAuthed = false;
+            pinBuffer = '';
+            renderPinDots();
+            pinError.textContent = msg.message || '配对码错误';
+          }
+        };
+
+        ws.onclose = () => {
+          isAuthed = false;
+          clearInterval(pingTimer);
+          setStatus('offline', '已断开，重连中…');
+          reconnectTimer = setTimeout(connect, 1200);
+        };
+
+        ws.onerror = () => { try { ws.close(); } catch (_) {} };
+      }
+
+      document.getElementById('statusPill').addEventListener('click', () => {
+        if (!ws || ws.readyState !== WebSocket.OPEN) connect();
+      });
+      axBanner.addEventListener('click', () => connect());
+
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && (!ws || ws.readyState !== WebSocket.OPEN)) connect();
+      });
+
+      // ================== PIN Pad ==================
+      let pinBuffer = '';
+      function openPinPad() {
+        pinBuffer = '';
+        renderPinDots();
+        pinOverlay.classList.add('open');
+      }
+      function renderPinDots() {
+        pinDots.forEach((d, i) => d.classList.toggle('filled', i < pinBuffer.length));
+      }
+      document.getElementById('pinPad').addEventListener('click', (e) => {
+        const btn = e.target.closest('.pin-key');
+        if (!btn) return;
+        const val = btn.dataset.n;
+        pinError.textContent = '';
+        if (val === 'clear') {
+          pinBuffer = '';
+        } else if (val === 'del') {
+          pinBuffer = pinBuffer.slice(0, -1);
+        } else if (pinBuffer.length < 4) {
+          pinBuffer += val;
+          if (pinBuffer.length === 4) {
+            prefs.pin = pinBuffer;
+            localStorage.setItem('pp_pin', pinBuffer);
+            send({ type: 'auth', pin: pinBuffer });
+          }
+        }
+        renderPinDots();
+      });
+
+      // ================== Mode Tabs ==================
+      const modeBtns = [...document.querySelectorAll('.seg-btn')];
+      const views = {
+        trackpad: document.getElementById('view-trackpad'),
+        remote: document.getElementById('view-remote'),
+        keyboard: document.getElementById('view-keyboard')
+      };
+      modeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.view;
+          modeBtns.forEach(b => b.classList.toggle('active', b === btn));
+          Object.entries(views).forEach(([k, el]) => el.classList.toggle('active', k === target));
+          if (target !== 'keyboard') document.activeElement?.blur?.();
+        });
+      });
+
+      // ================== Trackpad Engine ==================
+      const trackpad = document.getElementById('trackpad');
+      const deckHud = document.getElementById('deckHud');
+      const dots = [
+        document.getElementById('dot0'),
+        document.getElementById('dot1'),
+        document.getElementById('dot2')
+      ];
+      const btnLeft = document.getElementById('btnLeft');
+      const btnDrag = document.getElementById('btnDrag');
+      const btnRight = document.getElementById('btnRight');
+
+      let hudTimer = null;
+      function showHud(text, isAmber = false) {
+        deckHud.textContent = text;
+        deckHud.classList.toggle('amber', isAmber);
+        deckHud.classList.add('visible');
+        clearTimeout(hudTimer);
+        hudTimer = setTimeout(() => {
+          if (!dragLocked) deckHud.classList.remove('visible');
+        }, 680);
+      }
+
+      let dragLocked = false;
+      function setDragLock(active) {
+        dragLocked = active;
+        btnDrag.classList.toggle('armed', active);
+        trackpad.classList.toggle('dragging', active);
+        if (active) {
+          send({ type: 'down', button: 'left' });
+          showHud('拖拽已锁定', true);
+        } else {
+          send({ type: 'up', button: 'left' });
+          deckHud.classList.remove('visible');
+        }
+      }
+
+      function toVisualPoint(touch) {
+        if (isManualRotated()) {
+          return { id: touch.identifier, x: touch.clientY, y: -touch.clientX };
+        }
+        return { id: touch.identifier, x: touch.clientX, y: touch.clientY };
+      }
+
+      function snapshotTouches(touches) {
+        return [...touches].map(toVisualPoint);
+      }
+
+      function updateDots(touches) {
+        const rect = trackpad.getBoundingClientRect();
+        const rotated = isManualRotated();
+        for (let i = 0; i < dots.length; i++) {
+          if (i < touches.length) {
+            const t = touches[i];
+            const lx = rotated ? (t.clientY - rect.top) : (t.clientX - rect.left);
+            const ly = rotated ? (rect.right - t.clientX) : (t.clientY - rect.top);
+            dots[i].style.transform = `translate3d(${lx}px, ${ly}px, 0) scale(1)`;
+            dots[i].classList.add('active');
+          } else {
+            dots[i].classList.remove('active');
+          }
+        }
+      }
+
+      let pendingMoveX = 0, pendingMoveY = 0;
+      let pendingScrollX = 0, pendingScrollY = 0;
+      let rafScheduled = false;
+
+      function flushDeltas() {
+        rafScheduled = false;
+        if (ws && ws.bufferedAmount >= 1024) {
+          scheduleFlush();
+          return;
+        }
+        if (pendingMoveX !== 0 || pendingMoveY !== 0) {
+          send({
+            type: 'move',
+            dx: Math.round(pendingMoveX * 100) / 100,
+            dy: Math.round(pendingMoveY * 100) / 100
+          });
+          pendingMoveX = 0;
+          pendingMoveY = 0;
+        }
+        if (pendingScrollX !== 0 || pendingScrollY !== 0) {
+          send({
+            type: 'scroll',
+            dx: Math.round(pendingScrollX),
+            dy: Math.round(pendingScrollY)
+          });
+          pendingScrollX = 0;
+          pendingScrollY = 0;
+        }
+      }
+
+      function scheduleFlush() {
+        if (!rafScheduled) {
+          rafScheduled = true;
+          requestAnimationFrame(flushDeltas);
+        }
+      }
+
+      let inertiaVx = 0, inertiaVy = 0, inertiaRaf = 0;
+      function stopInertia() {
+        if (inertiaRaf) { cancelAnimationFrame(inertiaRaf); inertiaRaf = 0; }
+        inertiaVx = 0;
+        inertiaVy = 0;
+      }
+      function startInertia(vx, vy) {
+        stopInertia();
+        inertiaVx = vx;
+        inertiaVy = vy;
+        function step() {
+          inertiaVx *= 0.90;
+          inertiaVy *= 0.90;
+          if (Math.abs(inertiaVx) < 0.8 && Math.abs(inertiaVy) < 0.8) {
+            stopInertia();
+            return;
+          }
+          send({ type: 'scroll', dx: Math.round(inertiaVx), dy: Math.round(inertiaVy) });
+          inertiaRaf = requestAnimationFrame(step);
+        }
+        if (Math.abs(vx) > 2 || Math.abs(vy) > 2) {
+          inertiaRaf = requestAnimationFrame(step);
+        }
+      }
+
+      let maxFingers = 0;
+      let gestureStartTime = 0;
+      let totalMoveDist = 0;
+      let prevPoints = [];
+      let prevPinchDist = null;
+      let pinchAccum = 0;
+      let threeFingerTriggered = false;
+      let threeDx = 0, threeDy = 0;
+      let lastTapTime = 0;
+      let tapDragging = false;
+      let lastScrollVx = 0, lastScrollVy = 0;
+
+      function centerOf(pts) {
+        const sx = pts.reduce((a, p) => a + p.x, 0);
+        const sy = pts.reduce((a, p) => a + p.y, 0);
+        return { x: sx / pts.length, y: sy / pts.length };
+      }
+
+      function distOf(p1, p2) {
+        return Math.hypot(p2.x - p1.x, p2.y - p1.y);
+      }
+
+      function triggerThreeFinger(dx, dy) {
+        threeFingerTriggered = true;
+        triggerHaptic();
+        if (Math.abs(dy) > Math.abs(dx)) {
+          if (dy < 0) {
+            send({ type: 'action', action: 'mission_control' });
+            showHud('调度中心');
+          } else {
+            send({ type: 'action', action: 'app_expose' });
+            showHud('应用窗口');
+          }
+        } else {
+          if (dx < 0) {
+            send({ type: 'action', action: 'space_right' });
+            showHud('右侧桌面');
+          } else {
+            send({ type: 'action', action: 'space_left' });
+            showHud('左侧桌面');
+          }
+        }
+      }
+
+      trackpad.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        stopInertia();
+        const pts = snapshotTouches(e.touches);
+        updateDots(e.touches);
+
+        if (pts.length === 1 && maxFingers === 0) {
+          gestureStartTime = performance.now();
+          totalMoveDist = 0;
+          threeFingerTriggered = false;
+          threeDx = 0;
+          threeDy = 0;
+          pinchAccum = 0;
+
+          if (prefs.tapToClick && !dragLocked && (gestureStartTime - lastTapTime) < 230) {
+            tapDragging = true;
+            send({ type: 'down', button: 'left' });
+            triggerHaptic();
+            trackpad.classList.add('dragging');
+            showHud('拖拽中', true);
+          }
+        }
+
+        if (pts.length > maxFingers) {
+          maxFingers = pts.length;
+          if (maxFingers >= 3) {
+            pendingMoveX = 0;
+            pendingMoveY = 0;
+            pendingScrollX = 0;
+            pendingScrollY = 0;
+            threeDx = 0;
+            threeDy = 0;
+            showHud('三指手势');
+          }
+        }
+
+        prevPoints = pts;
+        prevPinchDist = pts.length === 2 ? distOf(pts[0], pts[1]) : null;
+        lastScrollVx = 0;
+        lastScrollVy = 0;
+      }, { passive: false });
+
+      trackpad.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const pts = snapshotTouches(e.touches);
+        updateDots(e.touches);
+        if (prevPoints.length !== pts.length) {
+          prevPoints = pts;
+          prevPinchDist = pts.length === 2 ? distOf(pts[0], pts[1]) : null;
+          return;
+        }
+
+        if (maxFingers >= 3) {
+          if (!threeFingerTriggered && pts.length >= 2) {
+            const curCenter = centerOf(pts);
+            const prevCenter = centerOf(prevPoints);
+            threeDx += curCenter.x - prevCenter.x;
+            threeDy += curCenter.y - prevCenter.y;
+            totalMoveDist += Math.hypot(curCenter.x - prevCenter.x, curCenter.y - prevCenter.y);
+            if (Math.abs(threeDx) > 28 || Math.abs(threeDy) > 28) {
+              triggerThreeFinger(threeDx, threeDy);
+            }
+          }
+          prevPoints = pts;
+          return;
+        }
+
+        if (pts.length === 1) {
+          const dx = pts[0].x - prevPoints[0].x;
+          const dy = pts[0].y - prevPoints[0].y;
+          const stepDist = Math.hypot(dx, dy);
+          totalMoveDist += stepDist;
+
+          const accel = prefs.pointerSpeed * (0.85 + Math.pow(Math.min(stepDist, 45) / 14, 1.32));
+          pendingMoveX += dx * accel;
+          pendingMoveY += dy * accel;
+          scheduleFlush();
+        } else if (pts.length === 2) {
+          const curCenter = centerOf(pts);
+          const prevCenter = centerOf(prevPoints);
+          const dx = curCenter.x - prevCenter.x;
+          const dy = curCenter.y - prevCenter.y;
+          totalMoveDist += Math.hypot(dx, dy);
+
+          const curDist = distOf(pts[0], pts[1]);
+          const dPinch = prevPinchDist !== null ? (curDist - prevPinchDist) : 0;
+          prevPinchDist = curDist;
+
+          const centerMove = Math.hypot(dx, dy);
+          if (Math.abs(dPinch) > 1.8 && Math.abs(dPinch) > centerMove * 1.45) {
+            pinchAccum += dPinch;
+            if (pinchAccum > 38) {
+              send({ type: 'action', action: 'zoom_in' });
+              triggerHaptic();
+              showHud('放大');
+              pinchAccum = 0;
+            } else if (pinchAccum < -38) {
+              send({ type: 'action', action: 'zoom_out' });
+              triggerHaptic();
+              showHud('缩小');
+              pinchAccum = 0;
+            }
+          } else {
+            const sign = prefs.naturalScroll ? 1 : -1;
+            const sx = dx * prefs.scrollSpeed * 2.1 * sign;
+            const sy = dy * prefs.scrollSpeed * 2.1 * sign;
+            pendingScrollX += sx;
+            pendingScrollY += sy;
+            lastScrollVx = sx;
+            lastScrollVy = sy;
+            scheduleFlush();
+          }
+        }
+
+        prevPoints = pts;
+      }, { passive: false });
+
+      trackpad.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        const remaining = snapshotTouches(e.touches);
+        updateDots(e.touches);
+
+        if (remaining.length > 0) {
+          prevPoints = remaining;
+          prevPinchDist = remaining.length === 2 ? distOf(remaining[0], remaining[1]) : null;
+          return;
+        }
+
+        const elapsed = performance.now() - gestureStartTime;
+
+        if (tapDragging) {
+          tapDragging = false;
+          send({ type: 'up', button: 'left' });
+          if (!dragLocked) trackpad.classList.remove('dragging');
+          maxFingers = 0;
+          return;
+        }
+
+        if (maxFingers >= 3) {
+          if (!threeFingerTriggered && (Math.abs(threeDx) > 18 || Math.abs(threeDy) > 18)) {
+            triggerThreeFinger(threeDx, threeDy);
+          }
+          maxFingers = 0;
+          prevPoints = [];
+          prevPinchDist = null;
+          threeDx = 0;
+          threeDy = 0;
+          return;
+        }
+
+        if (prefs.tapToClick && elapsed < 240 && totalMoveDist < 9) {
+          if (maxFingers === 1) {
+            if (dragLocked) {
+              setDragLock(false);
+              triggerHaptic();
+            } else {
+              send({ type: 'click', button: 'left' });
+              triggerHaptic();
+              lastTapTime = performance.now();
+            }
+          } else if (maxFingers === 2) {
+            send({ type: 'click', button: 'right' });
+            triggerHaptic();
+            showHud('右键');
+          }
+        } else if (maxFingers === 2 && totalMoveDist >= 10) {
+          startInertia(lastScrollVx, lastScrollVy);
+        }
+
+        maxFingers = 0;
+        prevPoints = [];
+        prevPinchDist = null;
+      }, { passive: false });
+
+      trackpad.addEventListener('touchcancel', () => {
+        updateDots([]);
+        if (tapDragging) {
+          tapDragging = false;
+          send({ type: 'up', button: 'left' });
+          if (!dragLocked) trackpad.classList.remove('dragging');
+        }
+        maxFingers = 0;
+        prevPoints = [];
+      });
+
+      btnLeft.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        btnLeft.classList.add('pressed');
+        triggerHaptic();
+        if (dragLocked) setDragLock(false);
+        else send({ type: 'down', button: 'left' });
+      }, { passive: false });
+      btnLeft.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        btnLeft.classList.remove('pressed');
+        if (!dragLocked) send({ type: 'up', button: 'left' });
+      }, { passive: false });
+      btnLeft.addEventListener('click', (e) => {
+        if (e.detail > 0 && !('ontouchstart' in window)) send({ type: 'click', button: 'left' });
+      });
+
+      btnRight.addEventListener('click', () => send({ type: 'click', button: 'right' }));
+      btnDrag.addEventListener('click', () => setDragLock(!dragLocked));
+
+      // ================== Apple Click-Wheel & Analog Joystick Engine ==================
+      const remoteView = document.getElementById('view-remote');
+      const clickWheel = document.getElementById('clickWheel');
+      const wheelKnob = document.getElementById('wheelKnob');
+      const wCenter = document.getElementById('wCenter');
+      const wDirs = {
+        up: document.getElementById('wUp'),
+        down: document.getElementById('wDown'),
+        left: document.getElementById('wLeft'),
+        right: document.getElementById('wRight')
+      };
+      const joyLeftBtn = document.getElementById('joyLeftBtn');
+      const joyDragBtn = document.getElementById('joyDragBtn');
+      const joyRightBtn = document.getElementById('joyRightBtn');
+      const wheelModeBtns = [...document.querySelectorAll('[data-wheel-mode]')];
+      let wheelMode = localStorage.getItem('pp_wheel_mode') || 'step';
+      if (!['step', 'scroll', 'volume', 'joystick'].includes(wheelMode)) wheelMode = 'step';
+
+      let joyDragLocked = false;
+      function setJoyDragLock(active) {
+        if (joyDragLocked === active) return;
+        joyDragLocked = active;
+        joyDragBtn.classList.toggle('armed', active);
+        if (active) send({ type: 'down', button: 'left' });
+        else send({ type: 'up', button: 'left' });
+      }
+
+      function syncWheelModeUI() {
+        wheelModeBtns.forEach(b => b.classList.toggle('active', b.dataset.wheelMode === wheelMode));
+        const isJoy = wheelMode === 'joystick';
+        clickWheel.classList.toggle('joystick-mode', isJoy);
+        remoteView.classList.toggle('joy-active', isJoy);
+        wCenter.textContent = isJoy ? '摇杆' : '确认';
+        if (!isJoy && joyDragLocked) setJoyDragLock(false);
+      }
+      syncWheelModeUI();
+      wheelModeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          wheelMode = btn.dataset.wheelMode;
+          localStorage.setItem('pp_wheel_mode', wheelMode);
+          stopJoystick();
+          syncWheelModeUI();
+        });
+      });
+
+      // Right-hand gamepad triggers (multi-touch safe while left thumb aims!)
+      joyLeftBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        joyLeftBtn.classList.add('pressed');
+        triggerHaptic();
+        if (joyDragLocked) setJoyDragLock(false);
+        else send({ type: 'down', button: 'left' });
+      }, { passive: false });
+      joyLeftBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        joyLeftBtn.classList.remove('pressed');
+        if (!joyDragLocked) send({ type: 'up', button: 'left' });
+      }, { passive: false });
+      joyLeftBtn.addEventListener('touchcancel', () => {
+        joyLeftBtn.classList.remove('pressed');
+        if (!joyDragLocked) send({ type: 'up', button: 'left' });
+      });
+      joyLeftBtn.addEventListener('click', (e) => {
+        if (e.detail > 0 && !('ontouchstart' in window)) send({ type: 'click', button: 'left' });
+      });
+
+      joyRightBtn.addEventListener('click', () => send({ type: 'click', button: 'right' }));
+      joyDragBtn.addEventListener('click', () => setJoyDragLock(!joyDragLocked));
+
+      let wheelReadoutTimer = null;
+      function showWheelReadout(text) {
+        clearTimeout(wheelReadoutTimer);
+        wCenter.textContent = text;
+        wCenter.classList.add('active-readout');
+        wheelReadoutTimer = setTimeout(() => {
+          wCenter.textContent = wheelMode === 'joystick' ? '摇杆' : '确认';
+          wCenter.classList.remove('active-readout');
+        }, 520);
+      }
+
+      function clearDirLit() {
+        Object.values(wDirs).forEach(el => el.classList.remove('lit'));
+      }
+
+      function flashDir(dir) {
+        clearDirLit();
+        if (wDirs[dir]) {
+          wDirs[dir].classList.add('lit');
+          setTimeout(() => wDirs[dir].classList.remove('lit'), 140);
+        }
+      }
+
+      function wheelLocalOffset(touch) {
+        const rect = clickWheel.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const rawX = touch.clientX - cx;
+        const rawY = touch.clientY - cy;
+        const vx = isManualRotated() ? rawY : rawX;
+        const vy = isManualRotated() ? -rawX : rawY;
+        const radius = Math.min(rect.width, rect.height) / 2;
+        return { vx, vy, dist: Math.hypot(vx, vy), angle: Math.atan2(vy, vx), radius };
+      }
+
+      function angleToDir(angle) {
+        if (angle >= -Math.PI * 0.75 && angle < -Math.PI * 0.25) return 'up';
+        if (angle >= -Math.PI * 0.25 && angle < Math.PI * 0.25) return 'right';
+        if (angle >= Math.PI * 0.25 && angle < Math.PI * 0.75) return 'down';
+        return 'left';
+      }
+
+      function positionKnob(angle, radius) {
+        const trackR = Math.max(20, radius - 14);
+        const kx = Math.cos(angle) * trackR;
+        const ky = Math.sin(angle) * trackR;
+        wheelKnob.style.transform = `translate3d(${kx.toFixed(1)}px, ${ky.toFixed(1)}px, 0)`;
+      }
+
+      function findTouchById(touchList, id) {
+        for (let i = 0; i < touchList.length; i++) {
+          if (touchList[i].identifier === id) return touchList[i];
+        }
+        return null;
+      }
+
+      // Xbox-inspired Joystick Engine (Floating Origin + Radial Deadzone + Axial Assist + EMA + Outer Boost + Anti-Freeze)
+      const joyRingGlow = document.getElementById('joyRingGlow');
+      const joyCurveOpts = [...document.querySelectorAll('[data-joy-curve]')];
+      if (!['precise', 'smooth', 'instant'].includes(prefs.joyCurve)) prefs.joyCurve = 'smooth';
+
+      function syncJoyCurveUI() {
+        joyCurveOpts.forEach(o => o.classList.toggle('selected', o.dataset.joyCurve === prefs.joyCurve));
+      }
+      syncJoyCurveUI();
+      joyCurveOpts.forEach(opt => {
+        opt.addEventListener('click', () => {
+          prefs.joyCurve = opt.dataset.joyCurve;
+          localStorage.setItem('pp_joy_curve', prefs.joyCurve);
+          syncJoyCurveUI();
+        });
+      });
+
+      const JOY_CURVES = {
+        precise: { base: 0.70, power: 2.85, max: 12.5, boost: 1.55 }, // Xbox Delayed: ultra-fine aim near center
+        smooth:  { base: 1.05, power: 2.25, max: 14.5, boost: 1.65 }, // Xbox Smooth: balanced precision + travel
+        instant: { base: 1.75, power: 1.65, max: 17.0, boost: 1.70 }  // Xbox Instant: snappy direct response
+      };
+
+      let joyRaf = 0;
+      let joyLastTs = 0;
+      let joyLastSendTs = 0;
+      let joyOriginX = 0, joyOriginY = 0; // Soft floating neutral origin inside wheel
+      let joyTargetX = 0, joyTargetY = 0; // Raw normalized vector [-1..1]
+      let joySmoothX = 0, joySmoothY = 0; // EMA-filtered vector (eliminates capacitive jitter)
+      let joyAccDx = 0, joyAccDy = 0;     // Sub-pixel & 60Hz coalesced delta accumulator
+      let joyPeggedSince = 0;             // Time-based outer-rim acceleration (Xbox turn boost)
+      let joyStartTime = 0;
+      let joyMaxDist = 0;
+
+      function setStickVisual(dx, dy) {
+        wCenter.style.transform = `translate(calc(-50% + ${dx.toFixed(1)}px), calc(-50% + ${dy.toFixed(1)}px))`;
+      }
+
+      function resetStickVisual() {
+        wCenter.classList.remove('joy-dragging');
+        wCenter.style.transform = 'translate(-50%, -50%)';
+        joyRingGlow.style.background = 'none';
+      }
+
+      function stopJoystick() {
+        if (joyRaf) { cancelAnimationFrame(joyRaf); joyRaf = 0; }
+        joyTargetX = 0;
+        joyTargetY = 0;
+        joySmoothX = 0;
+        joySmoothY = 0;
+        joyAccDx = 0;
+        joyAccDy = 0;
+        joyPeggedSince = 0;
+        clickWheel.classList.remove('spinning');
+        resetStickVisual();
+      }
+
+      // Soft axial assist (+/- 5 deg gentle blend toward H/V axes, preserves smooth 360 deg diagonals)
+      function applySoftAxialAssist(ux, uy) {
+        const ax = Math.abs(ux);
+        const ay = Math.abs(uy);
+        const snap = 0.088; // ~sin(5 deg)
+        if (ay < snap && ax > 0.5) {
+          const factor = (ay / snap) * (ay / snap);
+          const ny = uy * factor;
+          const len = Math.hypot(ux, ny) || 1;
+          return { x: ux / len, y: ny / len };
+        }
+        if (ax < snap && ay > 0.5) {
+          const factor = (ax / snap) * (ax / snap);
+          const nx = ux * factor;
+          const len = Math.hypot(nx, uy) || 1;
+          return { x: nx / len, y: uy / len };
+        }
+        return { x: ux, y: uy };
+      }
+
+      function joystickTick(now) {
+        if (!wheelActive || wheelMode !== 'joystick') {
+          joyRaf = 0;
+          return;
+        }
+        const dt = joyLastTs ? Math.min((now - joyLastTs) / 16.667, 2.2) : 1;
+        joyLastTs = now;
+
+        // Fast EMA smoothing for weighted hall-effect stick feel
+        const alpha = 1 - Math.pow(1 - 0.42, dt);
+        joySmoothX += (joyTargetX - joySmoothX) * alpha;
+        joySmoothY += (joyTargetY - joySmoothY) * alpha;
+
+        const mag = Math.hypot(joySmoothX, joySmoothY);
+        if (mag > 0.004) {
+          const cfg = JOY_CURVES[prefs.joyCurve] || JOY_CURVES.smooth;
+
+          // Xbox outer-rim boost: holding >= 90% tilt ramps smoothly up to boostx over 340ms
+          let boostMul = 1.0;
+          if (mag >= 0.90) {
+            if (!joyPeggedSince) joyPeggedSince = now;
+            const heldMs = now - joyPeggedSince;
+            if (heldMs > 200) {
+              const ramp = Math.min((heldMs - 200) / 340, 1);
+              boostMul = 1 + (cfg.boost - 1) * (ramp * ramp);
+            }
+          } else {
+            joyPeggedSince = 0;
+          }
+
+          const speed = prefs.pointerSpeed * (cfg.base * mag + cfg.max * Math.pow(mag, cfg.power)) * boostMul * dt;
+          joyAccDx += (joySmoothX / mag) * speed;
+          joyAccDy += (joySmoothY / mag) * speed;
+        } else {
+          joyPeggedSince = 0;
+        }
+
+        // Throttle network frames to ~60Hz + backpressure guard (prevents Wi-Fi queue buildup & freezing!)
+        if ((now - joyLastSendTs) >= 15.5) {
+          const canSend = ws && ws.readyState === WebSocket.OPEN && isAuthed && ws.bufferedAmount < 512;
+          if (canSend && (Math.abs(joyAccDx) >= 0.25 || Math.abs(joyAccDy) >= 0.25)) {
+            send({
+              type: 'move',
+              dx: Math.round(joyAccDx * 100) / 100,
+              dy: Math.round(joyAccDy * 100) / 100
+            });
+            joyAccDx = 0;
+            joyAccDy = 0;
+            joyLastSendTs = now;
+          } else if (ws && ws.bufferedAmount >= 512) {
+            // Drop excess backlog instead of letting latency snowball
+            joyAccDx *= 0.5;
+            joyAccDy *= 0.5;
+          }
+        }
+
+        joyRaf = requestAnimationFrame(joystickTick);
+      }
+
+      function updateJoystickFromTouch(touch) {
+        const info = wheelLocalOffset(touch);
+        // Deflection relative to soft floating origin (so landing slightly off-center never jerks!)
+        const rx = info.vx - joyOriginX;
+        const ry = info.vy - joyOriginY;
+        const rDist = Math.hypot(rx, ry);
+
+        const maxTravel = Math.max(40, info.radius * 0.58);
+        const clampedDist = Math.min(rDist, maxTravel);
+        const ux = rDist > 0.001 ? rx / rDist : 0;
+        const uy = rDist > 0.001 ? ry / rDist : 0;
+
+        joyMaxDist = Math.max(joyMaxDist, rDist);
+
+        // Keep visual cap comfortably inside wheel well
+        const visX = joyOriginX * 0.45 + ux * clampedDist;
+        const visY = joyOriginY * 0.45 + uy * clampedDist;
+        const visLen = Math.hypot(visX, visY);
+        const maxVis = info.radius * 0.60;
+        const visScale = visLen > maxVis ? (maxVis / visLen) : 1;
+        setStickVisual(visX * visScale, visY * visScale);
+
+        const deadzone = maxTravel * 0.12;
+        const outerSat = maxTravel * 0.88; // Reach 100% tilt at 88% so thumb never hits phone bezel
+        if (clampedDist <= deadzone) {
+          joyTargetX = 0;
+          joyTargetY = 0;
+          clickWheel.classList.remove('spinning');
+          joyRingGlow.style.background = 'none';
+          return;
+        }
+
+        const t = Math.min(1, (clampedDist - deadzone) / (outerSat - deadzone));
+        const assisted = applySoftAxialAssist(ux, uy);
+        joyTargetX = assisted.x * t;
+        joyTargetY = assisted.y * t;
+
+        const aimAngle = Math.atan2(assisted.y, assisted.x);
+        positionKnob(aimAngle, info.radius);
+        clickWheel.classList.add('spinning');
+
+        // Soft directional glass rim glow showing tilt intensity
+        const gx = 50 + assisted.x * 46;
+        const gy = 50 + assisted.y * 46;
+        const glowAlpha = (0.14 + t * 0.24).toFixed(2);
+        joyRingGlow.style.background = `radial-gradient(circle at ${gx.toFixed(0)}% ${gy.toFixed(0)}%, rgba(var(--accent-rgb), ${glowAlpha}), transparent 52%)`;
+      }
+
+      let wheelActive = false;
+      let wheelTouchId = null;
+      let wheelZone = null;
+      let wheelSpinning = false;
+      let wheelPrevAngle = 0;
+      let wheelAccumRad = 0;
+      let wheelTotalRad = 0;
+      let wheelHapticRad = 0;
+      let wheelLastOmega = 0;
+      let wheelHoldTimeout = null;
+      let wheelHoldInterval = null;
+      let wheelDidRepeat = false;
+      let wheelInertiaRaf = 0;
+
+      function stopWheelHold() {
+        clearTimeout(wheelHoldTimeout);
+        clearInterval(wheelHoldInterval);
+        wheelHoldTimeout = null;
+        wheelHoldInterval = null;
+      }
+
+      function stopWheelInertia() {
+        if (wheelInertiaRaf) { cancelAnimationFrame(wheelInertiaRaf); wheelInertiaRaf = 0; }
+      }
+
+      function startWheelInertia(omega) {
+        stopWheelInertia();
+        let v = omega;
+        function step() {
+          v *= 0.90;
+          if (Math.abs(v) < 0.008) { stopWheelInertia(); return; }
+          const dy = Math.round(-v * 165 * prefs.scrollSpeed);
+          if (dy !== 0) send({ type: 'scroll', dx: 0, dy });
+          wheelInertiaRaf = requestAnimationFrame(step);
+        }
+        if (Math.abs(v) > 0.03) wheelInertiaRaf = requestAnimationFrame(step);
+      }
+
+      clickWheel.addEventListener('touchstart', (e) => {
+        if (e.changedTouches.length === 0) return;
+        // Self-heal if a previous touch ended off-screen without firing touchend
+        if (wheelActive && !findTouchById(e.touches, wheelTouchId)) {
+          finishWheel(true);
+        }
+        if (wheelActive) return;
+        e.preventDefault();
+        const touch = e.changedTouches[0];
+        wheelTouchId = touch.identifier;
+        wheelActive = true;
+
+        stopWheelHold();
+        stopWheelInertia();
+
+        if (wheelMode === 'joystick') {
+          const info = wheelLocalOffset(touch);
+          // Soft floating origin (clamped to inner 42% so thumb resting slightly off-center starts at zero velocity)
+          const maxOrigin = info.radius * 0.42;
+          const oScale = info.dist > maxOrigin ? (maxOrigin / info.dist) : 1;
+          joyOriginX = info.vx * oScale;
+          joyOriginY = info.vy * oScale;
+          joyStartTime = performance.now();
+          joyMaxDist = 0;
+          joyAccDx = 0;
+          joyAccDy = 0;
+          joyPeggedSince = 0;
+          joyLastTs = 0;
+          joyLastSendTs = 0;
+          wCenter.classList.add('joy-dragging');
+          updateJoystickFromTouch(touch);
+          if (!joyRaf) joyRaf = requestAnimationFrame(joystickTick);
+          return;
+        }
+
+        const info = wheelLocalOffset(touch);
+        wheelSpinning = false;
+        wheelPrevAngle = info.angle;
+        wheelAccumRad = 0;
+        wheelTotalRad = 0;
+        wheelHapticRad = 0;
+        wheelLastOmega = 0;
+        wheelDidRepeat = false;
+
+        if (info.dist < info.radius * 0.40) {
+          wheelZone = 'center';
+          wCenter.classList.add('pressed');
+        } else {
+          wheelZone = angleToDir(info.angle);
+          clearDirLit();
+          wDirs[wheelZone]?.classList.add('lit');
+          positionKnob(info.angle, info.radius);
+
+          const heldDir = wheelZone;
+          wheelHoldTimeout = setTimeout(() => {
+            if (!wheelActive || wheelSpinning) return;
+            wheelDidRepeat = true;
+            send({ type: 'key', key: heldDir, mods: [] });
+            triggerHaptic();
+            wheelHoldInterval = setInterval(() => {
+              if (!wheelActive || wheelSpinning) { stopWheelHold(); return; }
+              send({ type: 'key', key: heldDir, mods: [] });
+            }, 115);
+          }, 360);
+        }
+      }, { passive: false });
+
+      // Listen on window for move/end/cancel so sliding outside the wheel or screen edge NEVER freezes!
+      window.addEventListener('touchmove', (e) => {
+        if (!wheelActive) return;
+        const touch = findTouchById(e.touches, wheelTouchId);
+        if (!touch) {
+          finishWheel(true);
+          return;
+        }
+        if (e.target === clickWheel || clickWheel.contains(e.target)) {
+          e.preventDefault();
+        }
+
+        if (wheelMode === 'joystick') {
+          updateJoystickFromTouch(touch);
+          return;
+        }
+
+        const info = wheelLocalOffset(touch);
+
+        if (wheelZone === 'center') {
+          if (info.dist >= info.radius * 0.44) {
+            wCenter.classList.remove('pressed');
+            wheelZone = angleToDir(info.angle);
+            wheelPrevAngle = info.angle;
+          }
+          return;
+        }
+
+        let dTheta = info.angle - wheelPrevAngle;
+        while (dTheta > Math.PI) dTheta -= Math.PI * 2;
+        while (dTheta < -Math.PI) dTheta += Math.PI * 2;
+        wheelPrevAngle = info.angle;
+
+        if (info.dist < info.radius * 0.28) return;
+
+        wheelTotalRad += Math.abs(dTheta);
+        if (!wheelSpinning && wheelTotalRad > 0.16) {
+          wheelSpinning = true;
+          stopWheelHold();
+          clearDirLit();
+          clickWheel.classList.add('spinning');
+        }
+
+        if (!wheelSpinning) return;
+
+        positionKnob(info.angle, info.radius);
+        wheelAccumRad += dTheta;
+        wheelLastOmega = dTheta;
+
+        if (wheelMode === 'step') {
+          const detent = 0.36;
+          while (wheelAccumRad >= detent) {
+            wheelAccumRad -= detent;
+            send({ type: 'key', key: 'right', mods: [] });
+            triggerHaptic();
+            flashDir('right');
+            showWheelReadout('前进 →');
+          }
+          while (wheelAccumRad <= -detent) {
+            wheelAccumRad += detent;
+            send({ type: 'key', key: 'left', mods: [] });
+            triggerHaptic();
+            flashDir('left');
+            showWheelReadout('← 后退');
+          }
+        } else if (wheelMode === 'scroll') {
+          const dy = Math.round(-dTheta * 165 * prefs.scrollSpeed);
+          if (dy !== 0) {
+            send({ type: 'scroll', dx: 0, dy });
+            showWheelReadout(dTheta > 0 ? '向下滚动' : '向上滚动');
+          }
+          wheelHapticRad += Math.abs(dTheta);
+          if (wheelHapticRad >= 0.62) {
+            wheelHapticRad = 0;
+            triggerHaptic();
+          }
+        } else if (wheelMode === 'volume') {
+          const detent = 0.34;
+          while (wheelAccumRad >= detent) {
+            wheelAccumRad -= detent;
+            send({ type: 'media', key: 'vol_up' });
+            triggerHaptic();
+            showWheelReadout('音量 ＋');
+          }
+          while (wheelAccumRad <= -detent) {
+            wheelAccumRad += detent;
+            send({ type: 'media', key: 'vol_down' });
+            triggerHaptic();
+            showWheelReadout('音量 −');
+          }
+        }
+      }, { passive: false });
+
+      function finishWheel(cancelled) {
+        if (!wheelActive) return;
+
+        if (wheelMode === 'joystick') {
+          const elapsed = performance.now() - joyStartTime;
+          const wasQuickTap = !cancelled && elapsed < 210 && joyMaxDist < 12;
+          wheelActive = false;
+          wheelTouchId = null;
+          stopJoystick();
+          if (wasQuickTap) {
+            // L3-style quick tap on thumbstick -> Left Click
+            if (joyDragLocked) setJoyDragLock(false);
+            else send({ type: 'click', button: 'left' });
+            triggerHaptic();
+            showWheelReadout('点按');
+          }
+          return;
+        }
+
+        stopWheelHold();
+        wCenter.classList.remove('pressed');
+        clearDirLit();
+        clickWheel.classList.remove('spinning');
+
+        if (!cancelled) {
+          if (wheelSpinning) {
+            if (wheelMode === 'scroll') startWheelInertia(wheelLastOmega);
+          } else if (!wheelDidRepeat) {
+            if (wheelZone === 'center') {
+              send({ type: 'key', key: 'space', mods: [] });
+              triggerHaptic();
+            } else if (wheelZone) {
+              send({ type: 'key', key: wheelZone, mods: [] });
+              triggerHaptic();
+              flashDir(wheelZone);
+            }
+          }
+        }
+
+        wheelActive = false;
+        wheelTouchId = null;
+        wheelSpinning = false;
+        wheelZone = null;
+      }
+
+      window.addEventListener('touchend', (e) => {
+        if (!wheelActive) return;
+        if (findTouchById(e.changedTouches, wheelTouchId) || !findTouchById(e.touches, wheelTouchId)) {
+          finishWheel(false);
+        }
+      }, { passive: true });
+      window.addEventListener('touchcancel', (e) => {
+        if (!wheelActive) return;
+        if (findTouchById(e.changedTouches, wheelTouchId) || !findTouchById(e.touches, wheelTouchId)) {
+          finishWheel(true);
+        }
+      }, { passive: true });
+      window.addEventListener('blur', () => {
+        if (wheelActive) finishWheel(true);
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && wheelActive) finishWheel(true);
+      });
+
+      // ================== Remote & Keyboard ==================
+      const armedMods = new Set();
+      const modBtns = [...document.querySelectorAll('.mod-btn')];
+
+      function clearMods() {
+        armedMods.clear();
+        modBtns.forEach(b => b.classList.remove('accent-armed'));
+      }
+
+      modBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mod = btn.dataset.mod;
+          if (armedMods.has(mod)) {
+            armedMods.delete(mod);
+            btn.classList.remove('accent-armed');
+          } else {
+            armedMods.add(mod);
+            btn.classList.add('accent-armed');
+          }
+        });
+      });
+
+      document.querySelectorAll('[data-key]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mods = [...armedMods];
+          send({ type: 'key', key: btn.dataset.key, mods });
+          if (mods.length) clearMods();
+        });
+      });
+
+      document.querySelectorAll('[data-shortcut]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mods = (btn.dataset.mods || '').split(',').filter(Boolean);
+          send({ type: 'key', key: btn.dataset.shortcut, mods });
+        });
+      });
+
+      document.querySelectorAll('[data-media]').forEach(btn => {
+        btn.addEventListener('click', () => send({ type: 'media', key: btn.dataset.media }));
+      });
+
+      document.querySelectorAll('[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => send({ type: 'action', action: btn.dataset.action }));
+      });
+
+      // Reliable Touch-First Send Buttons (prevents iOS keyboard blur from canceling taps)
+      const textInput = document.getElementById('textInput');
+      const sendTextBtn = document.getElementById('sendTextBtn');
+      const sendEnterBtn = document.getElementById('sendEnterBtn');
+
+      function flashBtn(btn, label, restoreLabel) {
+        clearTimeout(btn._flashTimer);
+        btn.textContent = label;
+        btn._flashTimer = setTimeout(() => {
+          btn.textContent = restoreLabel;
+        }, 620);
+      }
+
+      function sendInputText(withEnter, btn, defaultLabel) {
+        const val = textInput.value;
+        if (!val && !withEnter) return;
+
+        let ok = false;
+        if (val) {
+          ok = send({ type: 'text', text: val, enter: !!withEnter });
+        } else if (withEnter) {
+          ok = send({ type: 'key', key: 'enter', mods: [] });
+        }
+
+        if (ok) {
+          triggerHaptic();
+          if (val) textInput.value = '';
+          flashBtn(btn, '已发送', defaultLabel);
+        } else {
+          flashBtn(btn, '重连中…', defaultLabel);
+          if (!ws || ws.readyState !== WebSocket.OPEN) connect();
+        }
+      }
+
+      function bindSendButton(btn, withEnter, defaultLabel) {
+        let touchHandled = false;
+        btn.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          touchHandled = true;
+          btn.classList.add('pressed');
+        }, { passive: false });
+        btn.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          btn.classList.remove('pressed');
+          sendInputText(withEnter, btn, defaultLabel);
+        }, { passive: false });
+        btn.addEventListener('touchcancel', () => btn.classList.remove('pressed'));
+        btn.addEventListener('click', () => {
+          if (touchHandled) {
+            touchHandled = false;
+            return;
+          }
+          sendInputText(withEnter, btn, defaultLabel);
+        });
+      }
+
+      bindSendButton(sendTextBtn, false, '发送');
+      bindSendButton(sendEnterBtn, true, '发送并回车');
+
+      // ================== Settings Sheet ==================
+      const settingsSheet = document.getElementById('settingsSheet');
+      const pointerRange = document.getElementById('pointerRange');
+      const scrollRange = document.getElementById('scrollRange');
+      const pointerVal = document.getElementById('pointerVal');
+      const scrollVal = document.getElementById('scrollVal');
+      const naturalToggle = document.getElementById('naturalScrollToggle');
+      const tapToggle = document.getElementById('tapClickToggle');
+      const hapticToggle = document.getElementById('hapticToggle');
+
+      function syncSettingsUI() {
+        pointerRange.value = prefs.pointerSpeed;
+        pointerVal.textContent = prefs.pointerSpeed.toFixed(1) + '×';
+        scrollRange.value = prefs.scrollSpeed;
+        scrollVal.textContent = prefs.scrollSpeed.toFixed(1) + '×';
+        naturalToggle.checked = prefs.naturalScroll;
+        tapToggle.checked = prefs.tapToClick;
+        hapticToggle.checked = prefs.haptics;
+        landscapeToggle.checked = prefs.manualLandscape;
+      }
+      syncSettingsUI();
+
+      pointerRange.addEventListener('input', () => {
+        prefs.pointerSpeed = parseFloat(pointerRange.value);
+        localStorage.setItem('pp_pointer', String(prefs.pointerSpeed));
+        pointerVal.textContent = prefs.pointerSpeed.toFixed(1) + '×';
+      });
+      scrollRange.addEventListener('input', () => {
+        prefs.scrollSpeed = parseFloat(scrollRange.value);
+        localStorage.setItem('pp_scroll', String(prefs.scrollSpeed));
+        scrollVal.textContent = prefs.scrollSpeed.toFixed(1) + '×';
+      });
+      naturalToggle.addEventListener('change', () => {
+        prefs.naturalScroll = naturalToggle.checked;
+        localStorage.setItem('pp_natural', prefs.naturalScroll ? '1' : '0');
+      });
+      tapToggle.addEventListener('change', () => {
+        prefs.tapToClick = tapToggle.checked;
+        localStorage.setItem('pp_tap', prefs.tapToClick ? '1' : '0');
+      });
+      hapticToggle.addEventListener('change', () => {
+        prefs.haptics = hapticToggle.checked;
+        localStorage.setItem('pp_haptics', prefs.haptics ? '1' : '0');
+        syncHapticState();
+      });
+
+      document.getElementById('settingsBtn').addEventListener('click', () => {
+        syncSettingsUI();
+        settingsSheet.classList.add('open');
+      });
+      document.getElementById('closeSettingsBtn').addEventListener('click', () => {
+        settingsSheet.classList.remove('open');
+      });
+      settingsSheet.addEventListener('click', (e) => {
+        if (e.target === settingsSheet) settingsSheet.classList.remove('open');
+      });
+      document.getElementById('reenterPinBtn').addEventListener('click', () => {
+        settingsSheet.classList.remove('open');
+        prefs.pin = '';
+        localStorage.removeItem('pp_pin');
+        connect();
+      });
+
+      connect();
+    })();
+  </script>
+</body>
+</html>
